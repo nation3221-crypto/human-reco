@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>인재 추천 시스템 (HTML 번들)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- 인라인 스타일: 최신 감각의 심플 UI -->
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #020617;
+      --accent: #38bdf8;
+      --accent-soft: rgba(56, 189, 248, 0.16);
+      --accent-strong: #0ea5e9;
+      --border-subtle: rgba(148, 163, 184, 0.25);
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+      --badge-bg: rgba(148, 163, 184, 0.16);
+      --danger: #f97373;
+      --font-main: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --radius-lg: 18px;
+      --radius-xl: 26px;
+      --shadow-soft: 0 22px 45px rgba(15, 23, 42, 0.65);
+      --shadow-chip: 0 10px 25px rgba(15, 23, 42, 0.6);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: var(--font-main);
+      background: radial-gradient(circle at top left, #1e293b 0, #020617 48%, #000 100%);
+      color: var(--text-main);
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .app-shell {
+      width: 100%;
+      max-width: 1200px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.2fr);
+      gap: 18px;
+    }
+
+    @media (max-width: 960px) {
+      .app-shell {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .card {
+      background: radial-gradient(circle at top left, #020617, #020617 40%, #020617);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border-subtle);
+      box-shadow: var(--shadow-soft);
+      padding: 20px 20px 18px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 0 0, rgba(56,189,248,0.18), transparent 55%),
+        radial-gradient(circle at 100% 0, rgba(129,140,248,0.16), transparent 52%);
+      opacity: 0.9;
+      pointer-events: none;
+      mix-blend-mode: screen;
+    }
+
+    .card-inner {
+      position: relative;
+      z-index: 1;
+    }
+
+    .app-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+      gap: 12px;
+    }
+
+    .title-block {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .app-title {
+      font-size: 1.26rem;
+      font-weight: 650;
+      letter-spacing: 0.01em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .app-pill {
+      font-size: 0.72rem;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent-strong);
+      border: 1px solid rgba(56,189,248,0.3);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .app-pill-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #22c55e;
+      box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.28);
+    }
+
+    .app-subtitle {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 12px;
+      margin-top: 3px;
+    }
+
+    .chip {
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.9);
+      border: 1px solid rgba(51,65,85,0.9);
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: var(--shadow-chip);
+    }
+
+    .chip-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: rgba(148,163,184,0.9);
+    }
+
+    .chip-strong .chip-dot {
+      background: var(--accent);
+    }
+
+    .chip-strong {
+      border-color: rgba(56,189,248,0.6);
+      color: var(--accent);
+    }
+
+    .divider {
+      height: 1px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, transparent, rgba(148,163,184,0.45), transparent);
+      margin: 10px 0 16px;
+    }
+
+    /* 폼 영역 */
+    .form-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 10px;
+    }
+
+    @media (min-width: 720px) {
+      .form-grid {
+        grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+      }
+      .form-grid-full {
+        grid-column: 1 / -1;
+      }
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 2px;
+    }
+
+    .field-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .field-label span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .field-label small {
+      font-size: 0.7rem;
+      color: rgba(148,163,184,0.9);
+    }
+
+    .field-input,
+    .field-select {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 11px;
+      border: 1px solid rgba(51,65,85,0.95);
+      background: radial-gradient(circle at top left, #020617, #020617 55%, #020617);
+      color: var(--text-main);
+      font-size: 0.78rem;
+      outline: none;
+      transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.18s ease;
+    }
+
+    .field-input::placeholder {
+      color: rgba(148,163,184,0.7);
+    }
+
+    .field-input:focus,
+    .field-select:focus {
+      border-color: rgba(56,189,248,0.85);
+      box-shadow: 0 0 0 1px rgba(56,189,248,0.4);
+      background: radial-gradient(circle at top left, #020617, #020617 55%, #020617);
+    }
+
+    .field-hint {
+      font-size: 0.7rem;
+      color: rgba(148,163,184,0.85);
+      margin-top: 1px;
+    }
+
+    .form-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .btn {
+      border-radius: 999px;
+      border: none;
+      font-size: 0.78rem;
+      padding: 8px 16px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease, opacity 0.12s ease;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: radial-gradient(circle at 0 0, #38bdf8, #0ea5e9 40%, #0369a1 100%);
+      color: #0b1120;
+      font-weight: 600;
+      box-shadow: 0 16px 35px rgba(56,189,248,0.36);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 22px 40px rgba(56,189,248,0.45);
+      opacity: 0.98;
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+      box-shadow: 0 10px 24px rgba(15,23,42,0.8);
+      opacity: 0.94;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid rgba(51,65,85,0.9);
+      font-weight: 500;
+    }
+
+    .btn-ghost:hover {
+      background: rgba(15,23,42,0.95);
+      transform: translateY(-1px);
+    }
+
+    .btn-icon {
+      font-size: 0.9rem;
+    }
+
+    /* 오른쪽: 결과 카드 */
+    .results-headline {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .results-title {
+      font-size: 0.94rem;
+      font-weight: 580;
+    }
+
+    .results-meta {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .results-meta strong {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .results-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 400px;
+      overflow: auto;
+      padding-right: 4px;
+      padding-bottom: 6px;
+    }
+
+    .candidate-card {
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(51,65,85,0.95);
+      background: linear-gradient(135deg, rgba(15,23,42,0.95), rgba(15,23,42,0.96));
+      padding: 10px 12px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 10px;
+    }
+
+    @media (max-width: 640px) {
+      .candidate-card {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .candidate-rank {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      min-width: 45px;
+    }
+
+    .rank-badge {
+      padding: 2px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.5);
+      font-size: 0.7rem;
+    }
+
+    .rank-badge-top {
+      border-color: rgba(250,250,250,0.9);
+      color: #fefce8;
+      background: radial-gradient(circle at 0 0, #facc15, #eab308 50%, #a16207 100%);
+      box-shadow: 0 10px 22px rgba(234,179,8,0.35);
+    }
+
+    .candidate-main {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .candidate-name {
+      font-size: 0.88rem;
+      font-weight: 560;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .candidate-pill {
+      font-size: 0.68rem;
+      padding: 2px 7px;
+      border-radius: 999px;
+      border: 1px solid rgba(51,65,85,0.9);
+      color: var(--text-muted);
+    }
+
+    .candidate-sub {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+    }
+
+    .candidate-tags {
+      margin-top: 4px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .badge-soft {
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: var(--badge-bg);
+      font-size: 0.68rem;
+      color: rgba(209,213,219,0.95);
+      border: 1px solid rgba(75,85,99,0.9);
+    }
+
+    .candidate-score {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 4px;
+      min-width: 92px;
+    }
+
+    .score-main {
+      font-size: 0.88rem;
+      font-weight: 620;
+      color: var(--accent);
+    }
+
+    .score-bar-wrap {
+      width: 92px;
+      height: 5px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.9);
+      border: 1px solid rgba(31,41,55,0.85);
+      overflow: hidden;
+    }
+
+    .score-bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #22c55e, #a3e635, #facc15, #f97316);
+      transition: width 0.28s ease-out;
+    }
+
+    .score-detail {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      text-align: right;
+    }
+
+    .empty-state {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .empty-highlight {
+      color: var(--accent);
+      font-weight: 560;
+    }
+
+    /* 코드 섹션 */
+    .code-section {
+      margin-top: 18px;
+      border-radius: var(--radius-lg);
+      border: 1px dashed rgba(55,65,81,0.9);
+      background: rgba(15,23,42,0.85);
+      padding: 12px 14px;
+    }
+
+    .code-title {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .code-title strong {
+      color: var(--accent);
+    }
+
+    details {
+      border-radius: var(--radius-lg);
+    }
+
+    details summary {
+      cursor: pointer;
+      list-style: none;
+      font-size: 0.75rem;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    details summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .code-block {
+      margin-top: 8px;
+      max-height: 240px;
+      overflow: auto;
+      border-radius: 10px;
+      background: #020617;
+      padding: 10px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.72rem;
+      line-height: 1.4;
+      color: #e5e7eb;
+      border: 1px solid rgba(30,64,175,0.7);
+    }
+
+    .code-block code {
+      white-space: pre;
+    }
+
+    .pill-mini {
+      padding: 2px 6px;
+      border-radius: 999px;
+      border: 1px solid rgba(51,65,85,0.9);
+      font-size: 0.66rem;
+      color: var(--text-muted);
+    }
+
+    /* 스크롤바 약간만 커스터마이즈 */
+    ::-webkit-scrollbar {
+      width: 7px;
+      height: 7px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15,23,42,0.92);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(75,85,99,0.85);
+      border-radius: 999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(148,163,184,0.92);
+    }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- 좌측: 조건입력 + 코드 -->
+  <section class="card">
+    <div class="card-inner">
+      <header class="app-header">
+        <div class="title-block">
+          <div class="app-title">
+            인재 추천 시스템
+            <span class="app-pill">
+              <span class="app-pill-dot"></span>
+              기관용 역량모델 · HTML 번들
+            </span>
+          </div>
+          <div class="app-subtitle">
+            직무요건과 역량모델을 바탕으로, 후보자 추천 점수를 계산합니다.
+          </div>
+        </div>
+        <div>
+          <span class="pill-mini">프론트: HTML·CSS·JS</span>
+        </div>
+      </header>
+
+      <div class="badge-row">
+        <div class="chip chip-strong">
+          <span class="chip-dot"></span> Excel → Python → Web UI
+        </div>
+        <div class="chip">
+          <span class="chip-dot"></span> 직무전문 · 디지털 · 리더십 · 정책이해
+        </div>
+        <div class="chip">
+          <span class="chip-dot"></span> 스킬 · 경력 · 태그 기반 매칭
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <form id="reco-form">
+        <div class="form-grid">
+          <div class="field-group form-grid-full">
+            <label class="field-label">
+              <span>직무명 / 포지션명</span>
+              <small>예: AI·디지털 인사 기획, 데이터 분석가</small>
+            </label>
+            <input
+              type="text"
+              class="field-input"
+              id="job_title"
+              placeholder="채용·배치를 검토 중인 직무명을 입력하세요."
+            >
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">
+              <span>필수/우대 역량 (스킬 키워드)</span>
+              <small>콤마(,)로 구분</small>
+            </label>
+            <input
+              type="text"
+              class="field-input"
+              id="required_skills"
+              placeholder="예: Python, HR Analytics, 공공기관 경험"
+            >
+            <div class="field-hint">
+              직무기술서에서 핵심 키워드만 추려서 넣으면 좋습니다.
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">
+              <span>최소 요구 경력 (년)</span>
+              <small>부족 시 감점, 초과 시 소폭 가점</small>
+            </label>
+            <input
+              type="number"
+              class="field-input"
+              id="min_experience"
+              min="0"
+              value="5"
+            >
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">
+              <span>직무 유형</span>
+              <small>역량 가중치 조정</small>
+            </label>
+            <select class="field-select" id="job_type">
+              <option value="default">공통(기본값)</option>
+              <option value="digital">디지털·데이터 직무</option>
+              <option value="hr_planning">인사·조직·기획 직무</option>
+              <option value="policy">정책·제도 설계 직무</option>
+            </select>
+          </div>
+
+          <div class="field-group form-grid-full">
+            <label class="field-label">
+              <span>태그 / 도메인 키워드</span>
+              <small>콤마(,)로 구분</small>
+            </label>
+            <input
+              type="text"
+              class="field-input"
+              id="tags"
+              placeholder="예: 공공기관, 인사, 디지털전환, 정책"
+            >
+            <div class="field-hint">
+              기관 특성, 사업 분야, 정책 영역 등을 입력하면 도메인 적합도 계산에 반영됩니다.
+            </div>
+          </div>
+        </div>
+
+        <div class="form-footer">
+          <button type="button" class="btn btn-ghost" id="btn-reset">
+            <span class="btn-icon">⟲</span> 조건 초기화
+          </button>
+          <button type="submit" class="btn btn-primary">
+            <span class="btn-icon">⚡</span> 추천 결과 계산
+          </button>
+        </div>
+      </form>
+
+      <!-- 코드 설명 / Python 포함 -->
+      <section class="code-section">
+        <div class="code-title">
+          <span>백엔드 구현 예시 <strong>(Flask + Excel)</strong></span>
+          <span class="pill-mini">문서·개발자용 참고 코드</span>
+        </div>
+        <details>
+          <summary>▼ Python 백엔드 코드(app.py) 보기</summary>
+          <div class="code-block">
+            <code>
+from flask import Flask, render_template, request
+import pandas as pd
+import os
+
+app = Flask(__name__)
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+EXCEL_PATH = os.path.join(BASE_DIR, "data", "candidates_sample.xlsx")
+
+WEIGHTS = {
+    "default": {"job_expertise": 0.40, "digital_ai": 0.30, "leadership": 0.20, "public_policy": 0.10},
+    "digital": {"job_expertise": 0.30, "digital_ai": 0.45, "leadership": 0.15, "public_policy": 0.10},
+    "hr_planning": {"job_expertise": 0.45, "digital_ai": 0.20, "leadership": 0.25, "public_policy": 0.10},
+    "policy": {"job_expertise": 0.35, "digital_ai": 0.15, "leadership": 0.20, "public_policy": 0.30},
+}
+
+def load_candidates_from_excel(path: str):
+    df = pd.read_excel(path)
+    candidates = []
+    for _, row in df.iterrows():
+        skills = [s.strip() for s in str(row.get("스킬목록","") or "").split(",") if s.strip()]
+        tags   = [t.strip() for t in str(row.get("태그","") or "").split(",") if t.strip()]
+        candidates.append({
+            "id": row.get("candidate_id"),
+            "name": row.get("이름",""),
+            "dept": row.get("소속부서",""),
+            "grade": row.get("직급",""),
+            "position": row.get("현재직무명",""),
+            "experience": float(row.get("경력연수",0) or 0),
+            "email": row.get("이메일",""),
+            "phone": row.get("연락처",""),
+            "summary": row.get("주요경험요약",""),
+            "job_expertise": float(row.get("직무전문역량_점수",0) or 0),
+            "digital_ai": float(row.get("디지털·AI역량_점수",0) or 0),
+            "leadership": float(row.get("조직·리더십역량_점수",0) or 0),
+            "public_policy": float(row.get("공공/정책이해도_점수",0) or 0),
+            "skills": skills,
+            "tags": tags,
+        })
+    return candidates
+
+CANDIDATES = load_candidates_from_excel(EXCEL_PATH)
+
+def _norm(x):
+    try:
+        v = float(x) / 100.0
+        return max(0.0, min(1.0, v))
+    except Exception:
+        return 0.0
+
+def compute_capability_score(c, job_type="default"):
+    w = WEIGHTS.get(job_type, WEIGHTS["default"])
+    return (
+        w["job_expertise"] * _norm(c["job_expertise"]) +
+        w["digital_ai"]    * _norm(c["digital_ai"]) +
+        w["leadership"]    * _norm(c["leadership"]) +
+        w["public_policy"] * _norm(c["public_policy"])
+    )
+
+def compute_total_score(c, job):
+    skill_set = set(s.lower() for s in c["skills"])
+    job_skills = set(s.lower() for s in job.get("skills",[]))
+    skill_score = len(skill_set & job_skills) / max(1, len(job_skills))
+
+    exp = c["experience"]
+    min_exp = job.get("min_exp", 0)
+    if min_exp <= 0:
+        exp_score = 1.0
+    else:
+        gap = exp - min_exp
+        if gap >= 0:
+            bonus = min(gap / 10.0, 0.2)
+            exp_score = 1.0 + bonus
+        else:
+            exp_score = max(0.0, 1.0 + gap / 5.0)
+
+    tag_set = set(t.lower() for t in c["tags"])
+    job_tags = set(t.lower() for t in job.get("tags",[]))
+    tag_score = len(tag_set & job_tags) / max(1, len(job_tags))
+
+    capability = compute_capability_score(c, job.get("job_type","default"))
+
+    final_score = (
+        0.40 * skill_score +
+        0.20 * exp_score +
+        0.15 * tag_score +
+        0.25 * capability
+    )
+    return final_score
+
+@app.route("/", methods=["GET","POST"])
+def index():
+    recommendations = []
+    job_input = {"title":"", "skills":[], "min_exp":0, "tags":[], "job_type":"default"}
+    if request.method == "POST":
+        job_input["title"] = (request.form.get("job_title") or "").strip()
+        skills_raw = request.form.get("required_skills") or ""
+        tags_raw = request.form.get("tags") or ""
+        job_input["skills"] = [s.strip() for s in skills_raw.split(",") if s.strip()]
+        job_input["tags"] = [t.strip() for t in tags_raw.split(",") if t.strip()]
+        try:
+            job_input["min_exp"] = int(request.form.get("min_experience", 0))
+        except ValueError:
+            job_input["min_exp"] = 0
+        job_input["job_type"] = request.form.get("job_type") or "default"
+
+        scored = []
+        for cand in CANDIDATES:
+            score = compute_total_score(cand, job_input)
+            scored.append({**cand, "score": round(score * 100, 1)})
+
+        recommendations = sorted(scored, key=lambda x: x["score"], reverse=True)
+    return render_template("index.html", recommendations=recommendations, job_input=job_input)
+
+if __name__ == "__main__":
+    app.run(debug=True)
+            </code>
+          </div>
+        </details>
+      </section>
+    </div>
+  </section>
+
+  <!-- 우측: 결과 리스트 -->
+  <section class="card">
+    <div class="card-inner">
+      <header class="results-headline">
+        <div class="results-title">
+          추천 후보자 결과
+        </div>
+        <div class="results-meta" id="results-meta">
+          조건을 입력하고 <strong>우측 버튼</strong>을 눌러 결과를 확인하세요.
+        </div>
+      </header>
+
+      <div id="results-container" class="results-list">
+        <div class="empty-state">
+          아직 계산된 결과가 없습니다. <span class="empty-highlight">직무명, 스킬, 경력, 태그</span>를 입력한 후
+          <span class="empty-highlight">“추천 결과 계산”</span> 버튼을 눌러보세요.
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- 자바스크립트: 샘플 후보자 데이터 + 로직 (Python과 동일한 알고리즘) -->
+<script>
+  // Excel 샘플 파일과 동일한 후보자 데이터 (개념 데모용)
+  const candidates = [
+    {
+      id: 1,
+      name: "홍길동",
+      dept: "인사과",
+      grade: "6급",
+      position: "인사·조직 기획",
+      experience: 7,
+      job_expertise: 85,
+      digital_ai: 60,
+      leadership: 80,
+      public_policy: 90,
+      skills: ["HR Analytics", "Excel", "보고서 작성"],
+      tags: ["공공기관", "인사", "조직개편"]
+    },
+    {
+      id: 2,
+      name: "김철수",
+      dept: "디지털전략과",
+      grade: "6급",
+      position: "AI·데이터 분석",
+      experience: 5,
+      job_expertise: 80,
+      digital_ai: 90,
+      leadership: 70,
+      public_policy: 75,
+      skills: ["Python", "SQL", "Machine Learning"],
+      tags: ["공공기관", "데이터", "AI"]
+    },
+    {
+      id: 3,
+      name: "이영희",
+      dept: "정책기획실",
+      grade: "5급",
+      position: "정책·제도 설계",
+      experience: 10,
+      job_expertise: 88,
+      digital_ai: 55,
+      leadership: 85,
+      public_policy: 95,
+      skills: ["정책분석", "보고서 작성", "이해관계자 조정"],
+      tags: ["정책", "법령", "공공기관"]
+    }
+  ];
+
+  const WEIGHTS = {
+    default: {job_expertise: 0.40, digital_ai: 0.30, leadership: 0.20, public_policy: 0.10},
+    digital: {job_expertise: 0.30, digital_ai: 0.45, leadership: 0.15, public_policy: 0.10},
+    hr_planning: {job_expertise: 0.45, digital_ai: 0.20, leadership: 0.25, public_policy: 0.10},
+    policy: {job_expertise: 0.35, digital_ai: 0.15, leadership: 0.20, public_policy: 0.30}
+  };
+
+  function normScore(x) {
+    const v = Number(x) / 100;
+    if (isNaN(v)) return 0;
+    return Math.max(0, Math.min(1, v));
+  }
+
+  function computeCapabilityScore(c, jobType) {
+    const w = WEIGHTS[jobType] || WEIGHTS.default;
+    return (
+      w.job_expertise * normScore(c.job_expertise) +
+      w.digital_ai    * normScore(c.digital_ai) +
+      w.leadership    * normScore(c.leadership) +
+      w.public_policy * normScore(c.public_policy)
+    );
+  }
+
+  function computeTotalScore(c, jobCond) {
+    const candSkills = new Set(c.skills.map(s => s.toLowerCase()));
+    const jobSkills = new Set(jobCond.skills.map(s => s.toLowerCase()));
+
+    let skillScore = 0;
+    if (jobSkills.size > 0) {
+      let hits = 0;
+      jobSkills.forEach(s => { if (candSkills.has(s)) hits++; });
+      skillScore = hits / jobSkills.size;
+    }
+
+    const exp = Number(c.experience) || 0;
+    const minExp = Number(jobCond.min_exp) || 0;
+    let expScore;
+    if (minExp <= 0) {
+      expScore = 1.0;
+    } else {
+      const gap = exp - minExp;
+      if (gap >= 0) {
+        const bonus = Math.min(gap / 10.0, 0.2);
+        expScore = 1.0 + bonus;
+      } else {
+        expScore = Math.max(0.0, 1.0 + gap / 5.0);
+      }
+    }
+
+    const candTags = new Set(c.tags.map(t => t.toLowerCase()));
+    const jobTags = new Set(jobCond.tags.map(t => t.toLowerCase()));
+    let tagScore = 0;
+    if (jobTags.size > 0) {
+      let hits = 0;
+      jobTags.forEach(t => { if (candTags.has(t)) hits++; });
+      tagScore = hits / jobTags.size;
+    }
+
+    const capability = computeCapabilityScore(c, jobCond.job_type);
+
+    const finalScore =
+      0.40 * skillScore +
+      0.20 * expScore +
+      0.15 * tagScore +
+      0.25 * capability;
+
+    return finalScore;
+  }
+
+  function renderResults(resultList, jobCond) {
+    const container = document.getElementById("results-container");
+    const meta = document.getElementById("results-meta");
+
+    if (!resultList.length) {
+      container.innerHTML = '<div class="empty-state">조건에 적합한 후보자가 없습니다.</div>';
+      meta.innerHTML = '계산된 결과 <strong>0명</strong>';
+      return;
+    }
+
+    container.innerHTML = "";
+    const total = resultList.length;
+    meta.innerHTML = `계산된 결과 <strong>${total}명</strong> · 직무유형 <strong>${jobCond.job_type}</strong> 기반`;
+
+    resultList.forEach((item, index) => {
+      const outer = document.createElement("article");
+      outer.className = "candidate-card";
+
+      const rankSec = document.createElement("div");
+      rankSec.className = "candidate-rank";
+      const rankBadge = document.createElement("div");
+      rankBadge.className = "rank-badge" + (index === 0 ? " rank-badge-top" : "");
+      rankBadge.textContent = `#${index + 1}`;
+      const rankLabel = document.createElement("div");
+      rankLabel.textContent = "순위";
+      rankSec.appendChild(rankBadge);
+      rankSec.appendChild(rankLabel);
+
+      const main = document.createElement("div");
+      main.className = "candidate-main";
+      const nameRow = document.createElement("div");
+      nameRow.className = "candidate-name";
+      nameRow.innerHTML = `
+        ${item.name}
+        <span class="candidate-pill">${item.dept || "-"} · ${item.grade || "-"}</span>
+      `;
+      const subRow = document.createElement("div");
+      subRow.className = "candidate-sub";
+      subRow.textContent = item.position || "-";
+      main.appendChild(nameRow);
+      main.appendChild(subRow);
+
+      const tagsWrap = document.createElement("div");
+      tagsWrap.className = "candidate-tags";
+      const skillsToShow = item.skills.slice(0, 3);
+      skillsToShow.forEach(s => {
+        const badge = document.createElement("span");
+        badge.className = "badge-soft";
+        badge.textContent = s;
+        tagsWrap.appendChild(badge);
+      });
+      if (item.skills.length > 3) {
+        const more = document.createElement("span");
+        more.className = "badge-soft";
+        more.textContent = `+${item.skills.length - 3}`;
+        tagsWrap.appendChild(more);
+      }
+      main.appendChild(tagsWrap);
+
+      const scoreSec = document.createElement("div");
+      scoreSec.className = "candidate-score";
+      const scoreMain = document.createElement("div");
+      scoreMain.className = "score-main";
+      scoreMain.textContent = `${item.score.toFixed(1)} 점`;
+
+      const barWrap = document.createElement("div");
+      barWrap.className = "score-bar-wrap";
+      const barFill = document.createElement("div");
+      barFill.className = "score-bar-fill";
+      barFill.style.width = Math.min(100, Math.max(0, item.score)) + "%";
+      barWrap.appendChild(barFill);
+
+      const detail = document.createElement("div");
+      detail.className = "score-detail";
+      detail.innerHTML =
+        `경력 ${item.experience}년 · 직무전문 ${item.job_expertise} / 디지털 ${item.digital_ai}`;
+
+      scoreSec.appendChild(scoreMain);
+      scoreSec.appendChild(barWrap);
+      scoreSec.appendChild(detail);
+
+      outer.appendChild(rankSec);
+      outer.appendChild(main);
+      outer.appendChild(scoreSec);
+
+      container.appendChild(outer);
+    });
+  }
+
+  document.getElementById("reco-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const jobTitle = document.getElementById("job_title").value.trim();
+    const skillsRaw = document.getElementById("required_skills").value || "";
+    const tagsRaw = document.getElementById("tags").value || "";
+    const minExpStr = document.getElementById("min_experience").value || "0";
+    const jobType = document.getElementById("job_type").value || "default";
+
+    const jobCond = {
+      title: jobTitle,
+      skills: skillsRaw.split(",").map(s => s.trim()).filter(Boolean),
+      tags: tagsRaw.split(",").map(t => t.trim()).filter(Boolean),
+      min_exp: parseInt(minExpStr, 10) || 0,
+      job_type: jobType
+    };
+
+    const scored = candidates.map(c => {
+      const score = computeTotalScore(c, jobCond);
+      return {...c, score: score * 100};
+    }).sort((a, b) => b.score - a.score);
+
+    renderResults(scored, jobCond);
+  });
+
+  document.getElementById("btn-reset").addEventListener("click", function () {
+    document.getElementById("job_title").value = "";
+    document.getElementById("required_skills").value = "";
+    document.getElementById("tags").value = "";
+    document.getElementById("min_experience").value = "5";
+    document.getElementById("job_type").value = "default";
+    const container = document.getElementById("results-container");
+    const meta = document.getElementById("results-meta");
+    container.innerHTML = '<div class="empty-state">조건을 초기화했습니다. 다시 입력 후 <span class="empty-highlight">“추천 결과 계산”</span> 버튼을 눌러주세요.</div>';
+    meta.innerHTML = '조건을 입력하고 <strong>우측 버튼</strong>을 눌러 결과를 확인하세요.';
+  });
+</script>
+</body>
+</html>
